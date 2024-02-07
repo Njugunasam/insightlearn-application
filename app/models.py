@@ -38,6 +38,7 @@ class Teacher(db.Model):
     subject = db.Column(db.String(100), nullable=False)
     attendance_records = db.Column(db.JSON)
 
+
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
