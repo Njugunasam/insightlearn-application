@@ -21,3 +21,9 @@ class Student(db.Model):
     academic_performance = db.Column(db.JSON)
     attendance_records = db.Column(db.JSON)
 
+class Teacher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
+    attendance_records = db.Column(db.JSON)
