@@ -1,46 +1,43 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy_serializer import SerializerMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(50), nullable=False)
-    student = db.relationship('Student', backref='user', uselist=False)
-    teacher = db.relationship('Teacher', backref='user', uselist=False)
-    parent = db.relationship('Parent', backref='user', uselist=False)
+    username = db.Column(db.String(64), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
 
-class Student(db.Model):
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'username': self.username
+        }
+
+class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    class_grade = db.Column(db.String(50), nullable=False)
-    academic_performance = db.Column(db.JSON)
-    attendance_records = db.Column(db.JSON)
+    title = db.Column(db.String(128), nullable=False)
+    description = db.Column(db.Text)
+    due_date = db.Column(db.DateTime)
+    priority = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    user = db.relationship('User', backref=db.backref('tasks', lazy=True))
 
+    def __repr__(self):
+        return f'<Task {self.title}>'
 
-class Parent(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    children = db.relationship('Student', backref='parent', lazy=True)
-    attendance_notifications = db.Column(db.JSON)    
-
-
-class Teacher(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    subject = db.Column(db.String(100), nullable=False)
-    attendance_records = db.Column(db.JSON)
-
-
-class Attendance(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(20), nullable=False)
+    def serialize(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'due_date': self.due_date.strftime('%Y-%m-%d') if self.due_date else None,
+            'priority': self.priority
+        }
