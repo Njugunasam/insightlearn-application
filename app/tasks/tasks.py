@@ -1,36 +1,7 @@
-from flask import Flask, request, jsonify, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from flask_migrate import Migrate
-from functools import wraps  # Import wraps function
+from flask import Blueprint
 
-import jwt
-import datetime
-import secrets
+tasks_bp = Blueprint('tasks', __name__)
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
-
-db = SQLAlchemy(app)  # Define db before using it
-bcrypt = Bcrypt(app)
-migrate = Migrate(app, db)  # Pass db as argument here
-
-# Define your models here
-# User model
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    # Add other fields as needed
-
-# Task model
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 # Define your routes here
 # JWT token required decorator
 def token_required(f):
@@ -100,6 +71,3 @@ def add_task(current_user):
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'message': 'Task created successfully!'}), 201
-
-if __name__ == '__main__':
-    app.run(debug=True)
