@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import './App.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const LoginForm = ({ handleLogin }) => {
+const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleLogin({ username, password });
+    try {
+      const response = await axios.post('http://localhost:5000/login', { username, password });
+      console.log(response.data); // Log response for debugging
+      navigate('/tasks'); // Redirect to the TaskPage after successful login
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   return (
@@ -22,7 +30,6 @@ const LoginForm = ({ handleLogin }) => {
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-          <i className="fa fa-user"></i>
         </div>
         <div className="input-box">
           <input
@@ -32,7 +39,6 @@ const LoginForm = ({ handleLogin }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <i className="fa fa-lock"></i>
         </div>
         <button type="submit" className="btn">Login</button>
       </form>

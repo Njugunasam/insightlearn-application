@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const SignupForm = ({ handleSignup }) => {
+const SignupForm = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleSignup({ username, email, password });
+    try {
+      const response = await axios.post('http://localhost:5000/signup', { username, email, password });
+      console.log(response.data); // Log response for debugging
+      navigate('/tasks'); // Redirect to the TaskPage after successful signup
+    } catch (error) {
+      console.error('Signup error:', error);
+    }
   };
 
   return (
@@ -23,7 +31,6 @@ const SignupForm = ({ handleSignup }) => {
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-          <i className="fa fa-user"></i>
         </div>
         <div className="input-box">
           <input
@@ -33,7 +40,6 @@ const SignupForm = ({ handleSignup }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <i className="fa fa-envelope"></i>
         </div>
         <div className="input-box">
           <input
@@ -43,11 +49,9 @@ const SignupForm = ({ handleSignup }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <i className="fa fa-lock"></i>
         </div>
         <button type="submit" className="btn">Sign Up</button>
       </form>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
     </div>
   );
 };
