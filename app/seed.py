@@ -7,12 +7,12 @@ def seed():
         # Create sample users if they don't already exist
         samuel = User.query.filter_by(username='samuel').first()
         if not samuel:
-            samuel = User(username='samuel', password='password123')
+            samuel = User(username='samuel', email='samuel@example.com', password='password123')
             db.session.add(samuel)
         
         lawrence = User.query.filter_by(username='lawrence').first()
         if not lawrence:
-            lawrence = User(username='lawrence', password='securepass')
+            lawrence = User(username='lawrence', email='lawrence@example.com', password='securepass')
             db.session.add(lawrence)
         
         # Commit the changes to the database

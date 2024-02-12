@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS  # Import CORS from flask_cors module
 from flask_migrate import Migrate
 from functools import wraps  # Import wraps function
 
@@ -13,17 +14,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
-db = SQLAlchemy(app)  # Define db before using it
+db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-migrate = Migrate(app, db)  # Pass db as argument here
+migrate = Migrate(app, db)
+
+# Initialize CORS with default settings
+CORS(app)
 
 # Define your models here
 # User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    # Add other fields as needed
 
 # Task model
 class Task(db.Model):
@@ -31,7 +35,7 @@ class Task(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-# Define your routes here
+
 # JWT token required decorator
 def token_required(f):
     @wraps(f)
@@ -53,11 +57,12 @@ def token_required(f):
 @app.route('/signup', methods=['POST'])
 def signup():
     username = request.json.get('username')
+    email = request.json.get('email')
     password = request.json.get('password')
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required!'}), 400
+    if not username or not email or not password:
+        return jsonify({'message': 'Username, email, and password are required!'}), 400
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(username=username, password=hashed_password)
+    new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
     return jsonify({'message': 'User registered successfully!'}), 201
@@ -67,13 +72,14 @@ def signup():
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required!'}), 400
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password, password):
+        # Passwords match, login successful
         token = jwt.encode({'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')}), 200
-    return jsonify({'message': 'Invalid username or password!'}), 401
+        return jsonify({'token': token}), 200  # Removed .decode('UTF-8')
+    else:
+        # Invalid username or password
+        return jsonify({'message': 'Invalid username or password!'}), 401
 
 # Route to log out
 @app.route('/logout')
@@ -85,7 +91,7 @@ def logout():
 @app.route('/tasks', methods=['GET'])
 @token_required
 def get_tasks(current_user):
-    tasks = Task.query.filter_by(user=current_user).all()
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
     return jsonify([{'id': task.id, 'title': task.title, 'description': task.description} for task in tasks]), 200
 
 # Route to create a new task
@@ -96,7 +102,7 @@ def add_task(current_user):
     description = request.json.get('description')
     if not title or not description:
         return jsonify({'message': 'Title and description are required!'}), 400
-    new_task = Task(title=title, description=description, user=current_user)
+    new_task = Task(title=title, description=description, user_id=current_user.id)
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'message': 'Task created successfully!'}), 201
