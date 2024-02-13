@@ -4,7 +4,7 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background-color: #f0f0f0;
+  color: #fd7e14;
 }
 
 .container {
@@ -19,30 +19,39 @@ h2 {
   margin-top: 0;
 }
 
-/* Navbar styles */
-nav {
-  background-color: #333;
-  color: white;
-  padding: 10px 0;
+.navbar {
+  background-color: #474343; /* Set the background color */
+  padding: 30px 100px; /* Add padding for spacing */
 }
 
-nav a {
-  color: white;
-  text-decoration: none;
-  padding: 0 10px;
+.navbar-nav {
+  list-style: none; /* Remove default list styling */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
 }
 
-nav a:hover {
-  text-decoration: underline;
+.nav-item {
+  display: inline-block; /* Display list items horizontally */
+  margin-right: 30px; /* Add spacing between list items */
 }
 
-/* loginForm styles */
+.nav-link {
+  color: #fff; /* Set the text color */
+  text-decoration: none; /* Remove default underline */
+  font-size: 16px; /* Set the font size */
+}
+
+.nav-link:hover {
+  text-decoration: underline; /* Underline the link on hover */
+}
+
+/* Form styles */
 .form-container {
   max-width: 250px;
   margin: 20px auto 0;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(26, 22, 17, 0.795);
 }
 
 .form-container h2 {
@@ -51,18 +60,19 @@ nav a:hover {
 }
 
 .input-box {
+  position: relative;
   margin-bottom: 20px;
 }
 
 .input-box input {
   width: 100%;
-  padding: 10px;
+  padding: 10px 30px 10px 10px; /* Add padding for the icon */
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
 }
 
-.input-box i {
+.input-box svg {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -83,68 +93,60 @@ nav a:hover {
 .btn:hover {
   background-color: #0056b3;
 }
-/* TaskForm.css */
 
-/* TaskForm.css */
-
-.task-form-container {
-  max-width: 400px;
+.task-page-container {
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f0f0f0;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.task-input,
-.task-textarea {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
+.task-content {
+  display: flex;
 }
 
-.task-textarea {
-  resize: vertical;
-  min-height: 100px;
+.task-form {
+  flex: 1;
+  margin-right: 20px;
 }
 
-.task-label {
-  font-size: 18px;
-  color: #333;
-  font-weight: bold;
-}
-
-.task-btn {
-  background-color: #ff6f61;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 24px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.task-btn:hover {
-  background-color: #ff5349;
-}
-
-/* TaskList styles */
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
+.task-form h2 {
   margin-bottom: 10px;
 }
 
-strong {
+.task-form input,
+.task-form textarea,
+.task-form button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.task-list {
+  flex: 2;
+}
+
+.task-list h2 {
+  margin-bottom: 10px;
+}
+
+.task-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.task-list th,
+.task-list td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.task-list th {
+  background-color: #f2f2f2;
   font-weight: bold;
 }
+
 
 /* Feature styles */
 /* Home.css */
@@ -248,9 +250,23 @@ p {
   color: #555;
 }
 .footer {
-  background-color: #f2f2f2;
-  padding: 20px 0;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 130px; /* Adjust the height as needed */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.social-media-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  space-between: middle;
 }
 
 .container p {
@@ -365,5 +381,49 @@ a {
 }
 
 a:hover {
-  color: darkblue;
+  color: rgb(137, 137, 173);
+}
+.testimonials-container {
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  flex-wrap: wrap;
+}
+
+.testimonial {
+  width: 300px; /* Adjust width as needed */
+  margin: 20px; /* Add margin between testimonials */
+  text-align: center; /* Center text content */
+}
+
+.testimonial-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+}
+
+.testimonial-image {
+  border-radius: 50%; /* Make the image circular */
+  width: 150px; /* Set image width */
+  height: 150px; /* Set image height */
+  object-fit: cover;
+  margin-bottom: 10px; /* Add margin below image */
+}
+.say {
+  text-align: center; /* Center the text horizontally */
+  margin-bottom: 30px; /* Add margin for spacing */
+}
+.login-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f8d7da; /* Red color for error notification */
+  color: #721c24; /* Dark red text color */
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 999; /* Ensure it's above other elements */
+  display: flex;
+  align-items: center;
 }
