@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_cors import CORS  # Import CORS from flask_cors module
-from flask_migrate import Migrate
-from functools import wraps  # Import wraps function
-
+from flask_cors import CORS
+from functools import wraps
 import jwt
 import datetime
 import secrets
@@ -16,25 +14,25 @@ app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-migrate = Migrate(app, db)
 
 # Initialize CORS with default settings
 CORS(app)
 
 # Define your models here
-# User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
 
-# Task model
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Task('{self.title}', '{self.description}')"
 
 # JWT token required decorator
 def token_required(f):
@@ -59,8 +57,17 @@ def signup():
     username = request.json.get('username')
     email = request.json.get('email')
     password = request.json.get('password')
-    if not username or not email or not password:
-        return jsonify({'message': 'Username, email, and password are required!'}), 400
+    
+    # Additional validation for username and password
+    if not username or len(username) > 50:
+        return jsonify({'message': 'Username is required and must be at most 50 characters long!'}), 400
+    if not password or len(password) < 8 or not any(char.isdigit() for char in password):
+        return jsonify({'message': 'Password is required and must be at least 8 characters long and contain at least one digit!'}), 400
+    
+    # Check if the user already exists
+    if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+        return jsonify({'message': 'Username or email already exists!'}), 400
+    
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
@@ -76,10 +83,30 @@ def login():
     if user and bcrypt.check_password_hash(user.password, password):
         # Passwords match, login successful
         token = jwt.encode({'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        return jsonify({'token': token}), 200  # Removed .decode('UTF-8')
+        return jsonify({'token': token, 'username': user.username}), 200
     else:
         # Invalid username or password
         return jsonify({'message': 'Invalid username or password!'}), 401
+
+# Route to reset password confirmation
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    email = request.json.get('email')
+    new_password = request.json.get('password')
+    
+    # Additional validation for password
+    if not new_password or len(new_password) < 8 or not any(char.isdigit() for char in new_password):
+        return jsonify({'message': 'Password is required and must be at least 8 characters long and contain at least one digit!'}), 400
+
+    # Check if email exists in the database
+    user = User.query.filter_by(email=email).first()
+    if user:
+        # Update user's password
+        user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        db.session.commit()
+        return jsonify({'message': 'Password reset successfully!'}), 200
+    else:
+        return jsonify({'message': 'User not found!'}), 404
 
 # Route to log out
 @app.route('/logout')
@@ -95,17 +122,27 @@ def get_tasks(current_user):
     return jsonify([{'id': task.id, 'title': task.title, 'description': task.description} for task in tasks]), 200
 
 # Route to create a new task
-@app.route('/tasks', methods=['POST'])
+@app.route('/tasks/add', methods=['POST'])
 @token_required
 def add_task(current_user):
-    title = request.json.get('title')
-    description = request.json.get('description')
+    data = request.json
+    title = data.get('title')
+    description = data.get('description')
+
     if not title or not description:
-        return jsonify({'message': 'Title and description are required!'}), 400
+        return jsonify({'message': 'Title and description are required'}), 400
+
     new_task = Task(title=title, description=description, user_id=current_user.id)
     db.session.add(new_task)
     db.session.commit()
-    return jsonify({'message': 'Task created successfully!'}), 201
+
+    return jsonify({'message': 'Task added successfully'}), 201
+
+# Route to fetch user information
+@app.route('/user', methods=['GET'])
+@token_required
+def get_user_info(current_user):
+    return jsonify({'username': current_user.username}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
