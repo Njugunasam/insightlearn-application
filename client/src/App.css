@@ -100,8 +100,10 @@ h2 {
   padding: 20px;
 }
 
-.task-content {
-  display: flex;
+.task-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .task-form {
@@ -147,6 +149,22 @@ h2 {
   font-weight: bold;
 }
 
+.user-profile-section {
+  display: flex;
+  align-items: center; /* Center items vertically */
+  margin-bottom: 20px; /* Add some spacing between profile and tasks */
+}
+
+.profile-picture img {
+  width: 50px; /* Set width */
+  height: 50px; /* Set height */
+  border-radius: 50%; /* Make the image circular */
+  margin-right: 10px; /* Add some spacing between profile picture and username */
+}
+
+.username h2 {
+  margin: 0; /* Remove default margin */
+}
 
 /* Feature styles */
 /* Home.css */

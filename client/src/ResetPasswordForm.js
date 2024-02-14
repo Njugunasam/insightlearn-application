@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const ResetPasswordForm = () => {
     const [email, setEmail] = useState('');
@@ -9,42 +9,51 @@ const ResetPasswordForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const getToken = () => {
+        return localStorage.getItem('token');
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setLoading(true);
         try {
-            // Add validation for password match
             if (password !== confirmPassword) {
                 setError('Passwords do not match');
+                setLoading(false);
                 return;
             }
 
-            // Make HTTP request to reset password
+            // Set token in request headers
+            const token = getToken();
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+
             const response = await axios.post('http://localhost:5000/reset-password', {
                 email,
                 password,
-            });
+            }, config);
 
-            // Handle success
-            setSuccessMessage(response.data.message);
-            setEmail('');
-            setPassword('');
-            setConfirmPassword('');
+            if (response.status === 200) {
+                setSuccessMessage('Password reset successfully!');
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+            } else {
+                setError('User not found!');
+            }
+            setLoading(false);
         } catch (error) {
-            // Handle error
             setError(error.response.data.message);
+            setLoading(false);
         }
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const toggleConfirmPasswordVisibility = () => {
-        setShowConfirmPassword(!showConfirmPassword);
     };
 
     return (
@@ -54,6 +63,7 @@ const ResetPasswordForm = () => {
             {successMessage && <div className="success-message">{successMessage}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="input-box">
+                    <FontAwesomeIcon icon={faEnvelope} />
                     <input
                         type="email"
                         placeholder="Email"
@@ -63,6 +73,7 @@ const ResetPasswordForm = () => {
                     />
                 </div>
                 <div className="input-box">
+                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} onClick={() => setShowPassword(!showPassword)} />
                     <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="New Password"
@@ -70,13 +81,9 @@ const ResetPasswordForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <FontAwesomeIcon
-                        icon={showPassword ? faEyeSlash : faEye}
-                        onClick={togglePasswordVisibility}
-                        className="eye-icon"
-                    />
                 </div>
                 <div className="input-box">
+                    <FontAwesomeIcon icon={showConfirmPassword ? faEye : faEyeSlash} onClick={() => setShowConfirmPassword(!showConfirmPassword)} />
                     <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         placeholder="Confirm Password"
@@ -84,13 +91,8 @@ const ResetPasswordForm = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                     />
-                    <FontAwesomeIcon
-                        icon={showConfirmPassword ? faEyeSlash : faEye}
-                        onClick={toggleConfirmPasswordVisibility}
-                        className="eye-icon"
-                    />
                 </div>
-                <button type="submit" className="btn">Reset Password</button>
+                <button type="submit" disabled={loading}>{loading ? 'Resetting Password...' : 'Reset Password'}</button>
             </form>
         </div>
     );

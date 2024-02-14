@@ -12,17 +12,18 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    // Username format validation regex (alphanumeric with underscores allowed)
+    console.log('Form submitted:', { username, email, password }); // Log form data before sending the request
+
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
-
-    // Password strength validation regex (at least one digit and one letter)
     const passwordRegex = /^(?=.*\d)(?=.*[a-zA-Z]).{8,}$/;
-
-    // Email format validation regex with specific domain (gmail.com)
     const emailRegex = /^[^\s@]+@gmail\.com$/;
 
     if (!usernameRegex.test(username)) {
@@ -42,11 +43,19 @@ const SignupForm = () => {
 
     try {
       const response = await axios.post('http://localhost:5000/signup', { username, email, password });
-      console.log(response.data); // Log response for debugging
-      navigate('/tasks'); // Redirect to the task page after successful signup
+      console.log('Signup response:', response.data);
+
+      if (response.status === 201) {
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        console.log('Account created successfully!');
+        navigate('/tasks');
+      }
     } catch (error) {
-      if (error.response && error.response.status === 400 && error.response.data.message === 'Username or email already exists!') {
-        setError('Account already exists!');
+      if (error.response && error.response.status === 400 && error.response.data.error === 'Username or email already exists!') {
+        setError('Account already exists! Please login instead.');
+      } else if (error.response && error.response.status === 400 && error.response.data.error) {
+        setError(error.response.data.error); // Display other validation errors
       } else {
         console.error('Signup error:', error);
       }
@@ -57,15 +66,21 @@ const SignupForm = () => {
     setShowPassword(!showPassword);
   };
 
+  // Check if token exists in local storage and set it as default authorization header
+  const token = getToken();
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+
   return (
     <div className="form-container">
-      {/* Notification with icon */}
       <div className="notification">
         <FontAwesomeIcon icon={faBell} />
         <p>You must login to continue</p>
       </div>
 
-      {/* Signup form */}
       <h2>Sign Up</h2>
       {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
