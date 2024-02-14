@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import defaultProfilePicture from './default-profile-picture.png'; // Import a default profile picture image
+import ProfileDropdown from './ProfileDropdown'; // Import the modified ProfileDropdown component
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
@@ -8,7 +9,7 @@ const TaskPage = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [username, setUsername] = useState('');
-  const [profilePicture, setProfilePicture] = useState(null);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     const fetchUserData = async (token) => {
@@ -18,9 +19,7 @@ const TaskPage = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log('Fetched user data:', response.data); // Log the fetched user data
-        setUsername(response.data.username); // Set the username in the state
-        setProfilePicture(response.data.profilePicture); // Set the profile picture in the state
+        setUsername(response.data.username);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -33,7 +32,6 @@ const TaskPage = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log('Fetched tasks:', response.data); // Log the fetched tasks
         setTasks(response.data);
       } catch (error) {
         console.error('Error fetching tasks:', error);
@@ -43,12 +41,10 @@ const TaskPage = () => {
     const token = localStorage.getItem('token');
     if (token) {
       setUser(true);
-      console.log('User is authenticated');
-      fetchUserData(token); // Fetch user data if user is authenticated
-      fetchTasks(token); // Fetch tasks if user is authenticated
+      fetchUserData(token);
+      fetchTasks(token);
     } else {
       setUser(false);
-      console.log('User is not authenticated');
     }
   }, []);
 
@@ -56,7 +52,6 @@ const TaskPage = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      console.log('Adding new task with token:', token);
       const response = await axios.post(
         'http://localhost:5000/tasks/add',
         {
@@ -69,10 +64,8 @@ const TaskPage = () => {
           }
         }
       );
-      console.log('Added task:', response.data); // Log the added task
-      // Ensure the added task has a unique ID
       response.data.id = Math.random().toString(36).substr(2, 9);
-      setTasks(prevTasks => [...prevTasks, response.data]); // Update tasks state with the new task
+      setTasks(prevTasks => [...prevTasks, response.data]);
       setNewTaskTitle('');
       setNewTaskDescription('');
     } catch (error) {
@@ -80,17 +73,19 @@ const TaskPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(false);
+    navigate('/'); // Redirect to the homepage using navigate
+  };
+
   return (
     <div className="task-page-container">
       {user ? (
         <div>
           <div className="user-profile-section">
-            <div className="profile-picture">
-              <img src={profilePicture || defaultProfilePicture} alt="Profile" />
-            </div>
-            <div className="username">
-              <h2>Welcome {username ? `${username}!` : ''}</h2>
-            </div>
+            {/* Integrate ProfileDropdown component here */}
+            <ProfileDropdown username={username} onLogout={handleLogout} />
           </div>
           <div className="task-content">
             <div className="task-form">

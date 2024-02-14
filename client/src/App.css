@@ -149,22 +149,65 @@ h2 {
   font-weight: bold;
 }
 
-.user-profile-section {
+/* styles.css */
+
+.profile-dropdown {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.profile-info {
   display: flex;
-  align-items: center; /* Center items vertically */
-  margin-bottom: 20px; /* Add some spacing between profile and tasks */
+  align-items: center;
+  cursor: pointer;
 }
 
-.profile-picture img {
-  width: 50px; /* Set width */
-  height: 50px; /* Set height */
-  border-radius: 50%; /* Make the image circular */
-  margin-right: 10px; /* Add some spacing between profile picture and username */
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  border-radius: 50%; /* Make the profile picture circular */
 }
 
-.username h2 {
-  margin: 0; /* Remove default margin */
+.welcome-message {
+  font-weight: bold;
 }
+
+.dropdown-content {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding: 10px;
+}
+
+.dropdown-content img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.username, .email {
+  margin-bottom: 5px;
+}
+
+.dropdown-item {
+  cursor: pointer;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background-color: #ccc;
+  color: #fff;
+}
+
+
 
 /* Feature styles */
 /* Home.css */

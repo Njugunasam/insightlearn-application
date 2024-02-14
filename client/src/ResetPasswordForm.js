@@ -37,8 +37,6 @@ const ResetPasswordForm = () => {
                 setEmail('');
                 setPassword('');
                 setConfirmPassword('');
-            } else if (response.status === 404) {
-                setError('User not found. Please check your email and try again.');
             } else {
                 setError('An error occurred. Please try again later.');
             }
@@ -46,7 +44,11 @@ const ResetPasswordForm = () => {
         } catch (error) {
             // Log error response data
             console.error('Error:', error.response);
-            setError(error.response.data.message);
+            if (error.response.status === 404 && error.response.data.message === 'User not found') {
+                setError('Account doesn\'t exist. Please check your email and try again.');
+            } else {
+                setError('User not found!Recheck your email and try again.');
+            }
             setLoading(false);
         }
     };
