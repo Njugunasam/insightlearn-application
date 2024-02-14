@@ -119,9 +119,18 @@ def reset_password():
         # Update user's password
         user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
         db.session.commit()
+
+        # Log password reset message
+        print(f"Password for user '{user.username}' reset successfully!")
+        
         return jsonify({'message': 'Password reset successfully!'}), 200
     else:
+        # Log user not found message
+        print(f"User with email '{email}' not found!")
+
         return jsonify({'message': 'User not found!'}), 404
+
+
 
 # Route to log out
 @app.route('/logout')
