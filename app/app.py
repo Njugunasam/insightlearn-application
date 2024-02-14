@@ -133,9 +133,11 @@ def reset_password():
 
 
 # Route to log out
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 def logout():
-    # Code to logout user (optional)
+    # Here, you can include code to clear the authentication token from the client-side.
+    # For example, you can remove the token from local storage in the frontend.
+    
     return jsonify({'message': 'User logged out successfully'}), 200
 # Route to view all tasks assigned to the logged-in user
 @app.route('/tasks', methods=['GET'])
