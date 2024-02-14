@@ -13,10 +13,6 @@ const ResetPasswordForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const getToken = () => {
-        return localStorage.getItem('token');
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -28,29 +24,28 @@ const ResetPasswordForm = () => {
                 return;
             }
 
-            // Set token in request headers
-            const token = getToken();
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-
             const response = await axios.post('http://localhost:5000/reset-password', {
                 email,
                 password,
-            }, config);
+            });
+
+            // Log response data
+            console.log('Response:', response);
 
             if (response.status === 200) {
                 setSuccessMessage('Password reset successfully!');
                 setEmail('');
                 setPassword('');
                 setConfirmPassword('');
+            } else if (response.status === 404) {
+                setError('User not found. Please check your email and try again.');
             } else {
-                setError('User not found!');
+                setError('An error occurred. Please try again later.');
             }
             setLoading(false);
         } catch (error) {
+            // Log error response data
+            console.error('Error:', error.response);
             setError(error.response.data.message);
             setLoading(false);
         }
