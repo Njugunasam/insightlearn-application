@@ -6,6 +6,7 @@ from functools import wraps
 import jwt
 import datetime
 import secrets
+import re
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
@@ -51,28 +52,42 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
-# Route to register a new user
 @app.route('/signup', methods=['POST'])
 def signup():
-    username = request.json.get('username')
-    email = request.json.get('email')
-    password = request.json.get('password')
+    # Extract user data from request
+    data = request.json
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
     
-    # Additional validation for username and password
-    if not username or len(username) > 50:
-        return jsonify({'message': 'Username is required and must be at most 50 characters long!'}), 400
-    if not password or len(password) < 8 or not any(char.isdigit() for char in password):
-        return jsonify({'message': 'Password is required and must be at least 8 characters long and contain at least one digit!'}), 400
+    # Check if all required fields are present
+    if not username or not email or not password:
+        return jsonify({'error': 'All fields are required!'}), 400
     
+    # Validate email format
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return jsonify({'error': 'Invalid email address!'}), 400
+    
+    # Validate password criteria
+    if len(password) < 8 or not any(char.isdigit() for char in password):
+        return jsonify({'error': 'Password must be at least 8 characters long and contain at least one digit!'}), 400
+
     # Check if the user already exists
     if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
-        return jsonify({'message': 'Username or email already exists!'}), 400
+        return jsonify({'error': 'Username or email already exists! Please login instead.'}), 400
     
+    # Create a new user
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message': 'User registered successfully!'}), 201
+
+    # Log a message indicating successful user registration
+    print(f"User '{username}' registered successfully!")
+    
+    # After successful registration
+    token = jwt.encode({'user_id': new_user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+    return jsonify({'message': 'User registered successfully!', 'token': token}), 201
 
 # Route to login and get JWT token
 @app.route('/login', methods=['POST'])
@@ -112,8 +127,7 @@ def reset_password():
 @app.route('/logout')
 def logout():
     # Code to logout user (optional)
-    return redirect(url_for('login'))
-
+    return jsonify({'message': 'User logged out successfully'}), 200
 # Route to view all tasks assigned to the logged-in user
 @app.route('/tasks', methods=['GET'])
 @token_required
