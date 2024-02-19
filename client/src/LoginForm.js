@@ -20,7 +20,7 @@ const LoginForm = () => {
         e.preventDefault();
         setLoading(true); // Set loading state to true while sending request
         try {
-            const response = await axios.post('http://localhost:5000/login', { username, password });
+            const response = await axios.post('http://localhost:8000/login', { username, password });
             const { token } = response.data; // Destructure only 'token' from response.data
             localStorage.setItem('token', token); // Store token in localStorage
             console.log('Token:', token); // Log token for debugging

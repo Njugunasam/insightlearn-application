@@ -42,7 +42,7 @@ const SignupForm = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/signup', { username, email, password });
+      const response = await axios.post('http://localhost:8000/signup', { username, email, password });
       console.log('Signup response:', response.data);
 
       if (response.status === 201) {

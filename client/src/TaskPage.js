@@ -14,7 +14,7 @@ const TaskPage = () => {
   useEffect(() => {
     const fetchUserData = async (token) => {
       try {
-        const response = await axios.get('http://localhost:5000/user', {
+        const response = await axios.get('http://localhost:8000/user', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -27,7 +27,7 @@ const TaskPage = () => {
 
     const fetchTasks = async (token) => {
       try {
-        const response = await axios.get('http://localhost:5000/tasks', {
+        const response = await axios.get('http://localhost:8000/tasks', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -53,7 +53,7 @@ const TaskPage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/tasks/add',
+        'http://localhost:8000/tasks/add',
         {
           title: newTaskTitle,
           description: newTaskDescription
