@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -8,20 +8,35 @@ import jwt
 import datetime
 import secrets
 import re
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
+# Define the path to the React build directory
+react_build_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'client', 'build')
+
+# Serve static files from the React build directory
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_static(path):
+    if path != "" and os.path.exists(os.path.join(react_build_path, path)):
+        # Serve any other static files
+        return app.send_static_file(path)
+    else:
+        # Serve index.html for any other route
+        return app.send_static_file('index.html')
+
+# Initialize SQLAlchemy, Migrate, and Bcrypt
 db = SQLAlchemy(app)
-mirgate = Migrate(app, db)
+migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 
 # Initialize CORS with default settings
 CORS(app)
-
-# Define your models here
 
 
 class User(db.Model):
