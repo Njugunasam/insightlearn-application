@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
 from functools import wraps
+from flask import send_from_directory
 import jwt
 import datetime
 import secrets
@@ -16,8 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
 # Define the path to the React build directory
-react_build_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'client', 'build')
+react_build_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 # Serve static files from the React build directory
 @app.route('/', defaults={'path': ''})
@@ -25,10 +25,10 @@ react_build_path = os.path.join(
 def serve_static(path):
     if path != "" and os.path.exists(os.path.join(react_build_path, path)):
         # Serve any other static files
-        return app.send_static_file(path)
+        return send_from_directory(react_build_path, path)
     else:
         # Serve index.html for any other route
-        return app.send_static_file('index.html')
+        return send_from_directory(react_build_path, 'index.html')
 
 # Initialize SQLAlchemy, Migrate, and Bcrypt
 db = SQLAlchemy(app)
