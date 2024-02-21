@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 
 # Define the path to the React build directory
-react_build_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+react_build_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'build')
 
 # Serve static files from the React build directory
 @app.route('/', defaults={'path': ''})

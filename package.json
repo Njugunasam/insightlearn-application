@@ -22,9 +22,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start-frontend": "serve -s build",
     "start-backend": "cd server && gunicorn app:app",
-    "start-all": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
+  "start-frontend": "serve -s build",
+  "start-all": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "build": "react-scripts build",
     "test": "npm test",
     "eject": "npm run eject"
